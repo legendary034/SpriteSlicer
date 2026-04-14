@@ -1,16 +1,17 @@
 :root {
-    --bg-dark: #0f111a;
-    --sidebar-bg: rgba(26, 30, 41, 0.7);
+    --bg-dark: #0a1128;
+    --bg-gradient: linear-gradient(135deg, #0a1128 0%, #064e8a 100%);
+    --sidebar-bg: rgba(15, 23, 42, 0.75);
     --border-color: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
     --text-secondary: #94a3b8;
-    --accent-glow: rgba(192, 38, 211, 0.5);
+    --accent-glow: rgba(0, 212, 255, 0.5);
     
-    --grad-primary: linear-gradient(135deg, #c026d3 0%, #3b82f6 100%);
-    --grad-hover: linear-gradient(135deg, #d946ef 0%, #60a5fa 100%);
+    --grad-primary: linear-gradient(135deg, #ff7b00 0%, #ffea00 100%);
+    --grad-hover: linear-gradient(135deg, #ff9500 0%, #fffb00 100%);
     
-    --glass-bg: rgba(30, 41, 59, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(15, 23, 42, 0.4);
+    --glass-border: rgba(0, 212, 255, 0.15);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     
     --spacing-sm: 8px;
@@ -27,6 +28,7 @@
 
 body {
     font-family: 'Inter', sans-serif;
+    background: var(--bg-gradient);
     background-color: var(--bg-dark);
     color: var(--text-primary);
     overflow: hidden;
@@ -151,8 +153,8 @@ select {
 }
 
 input:focus, select:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3);
 }
 
 .info-box {
@@ -161,7 +163,7 @@ input:focus, select:focus {
     border-radius: 8px;
     padding: 12px;
     font-size: 13px;
-    color: #60a5fa;
+    color: #00d4ff;
     margin-top: 8px;
     display: flex;
     align-items: center;
@@ -192,7 +194,7 @@ input:focus, select:focus {
 
 .upload-btn:hover {
     background: rgba(255, 255, 255, 0.1);
-    border-color: #c026d3;
+    border-color: #00d4ff;
     color: #fff;
     box-shadow: 0 0 15px var(--accent-glow);
 }
@@ -206,21 +208,21 @@ input:focus, select:focus {
     border: none;
     border-radius: 8px;
     padding: 14px;
-    color: white;
-    font-weight: 600;
+    color: #111;
+    font-weight: 700;
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(192, 38, 211, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 123, 0, 0.3);
     margin-top: var(--spacing-sm);
 }
 
 .primary-btn:hover:not(:disabled) {
     background: var(--grad-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(192, 38, 211, 0.5);
+    box-shadow: 0 6px 20px rgba(255, 123, 0, 0.5);
 }
 
 .primary-btn:active:not(:disabled) {
