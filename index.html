@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Slicer & Padder</title>
+    <!-- Modern Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- JSZip for zipping files in browser -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h1>Sprite Slicer</h1>
+                <p>Slice, format, and pad sprite sheets</p>
+            </div>
+
+            <div class="control-group file-upload-group">
+                <label for="image-upload" class="upload-btn">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Upload Sprite Sheet
+                </label>
+                <input type="file" id="image-upload" accept="image/*" hidden>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="control-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px;">
+                    <h3>Detection Mode</h3>
+                </div>
+                <div class="input-cell full-width">
+                    <select id="slice-mode">
+                        <option value="grid">Manual Grid</option>
+                        <option value="auto-island">Auto-Extract (Islands)</option>
+                        <option value="auto-box">Auto-Extract (Drawn Borders)</option>
+                    </select>
+                </div>
+
+                <div id="manual-grid-controls" style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                    <p class="help-text">Define a uniform grid with optional offsets.</p>
+                    <div class="input-row">
+                        <div class="input-cell">
+                            <label for="grid-w">Width (px)</label>
+                            <input type="number" id="grid-w" value="64" min="1">
+                        </div>
+                        <div class="input-cell">
+                            <label for="grid-h">Height (px)</label>
+                            <input type="number" id="grid-h" value="64" min="1">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-cell">
+                            <label for="grid-off-x">Offset X</label>
+                            <input type="number" id="grid-off-x" value="0" min="0">
+                        </div>
+                        <div class="input-cell">
+                            <label for="grid-off-y">Offset Y</label>
+                            <input type="number" id="grid-off-y" value="0" min="0">
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-cell">
+                            <label for="grid-gap-x">Gap X</label>
+                            <input type="number" id="grid-gap-x" value="0" min="0">
+                        </div>
+                        <div class="input-cell">
+                            <label for="grid-gap-y">Gap Y</label>
+                            <input type="number" id="grid-gap-y" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="auto-detect-controls" style="display: none; flex-direction: column; gap: 12px; margin-top: 4px;">
+                    <p class="help-text">Find drawn bounding boxes of a specific color.</p>
+                    <div class="input-row">
+                        <div class="input-cell" style="flex: 0.5;">
+                            <label for="box-color">Border Color</label>
+                            <input type="color" id="box-color" value="#ff0000" style="padding: 2px; height: 38px; cursor: pointer;">
+                        </div>
+                        <div class="input-cell">
+                            <label for="box-tolerance">Tol. (0-100)</label>
+                            <input type="number" id="box-tolerance" value="20" min="0" max="100">
+                        </div>
+                    </div>
+                    <div class="input-row" style="align-items: center; gap: 8px;">
+                        <input type="checkbox" id="exclude-border" checked style="width: auto;">
+                        <label for="exclude-border" style="cursor: pointer; font-size: 13px;">Exclude Frame Line (Inset 1px)</label>
+                    </div>
+                </div>
+                
+                <div id="auto-island-controls" style="display: none; flex-direction: column; gap: 12px; margin-top: 4px;">
+                    <p class="help-text" style="color: #60a5fa;">Finds sprites using transparency. Use <strong>Background Removal</strong> below to set transparent areas.</p>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Image Adjustments</h3>
+                <p class="help-text">Scale the image to fit your grid properly.</p>
+                <div class="input-cell full-width">
+                    <label for="image-scale">Image Scale (%)</label>
+                    <input type="number" id="image-scale" value="100" min="1">
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Background Removal</h3>
+                <p class="help-text">Remove solid background colors from sprites.</p>
+                <div class="input-row" style="align-items: center; gap: 8px;">
+                    <input type="checkbox" id="remove-bg" style="width: auto;">
+                    <label for="remove-bg" style="cursor: pointer;">Enable Transparency</label>
+                </div>
+                <div id="bg-controls" style="display: none; flex-direction: column; gap: 12px; margin-top: 8px;">
+                    <div class="input-row">
+                        <div class="input-cell" style="flex: 0.5;">
+                            <label for="bg-color">Color to Remove</label>
+                            <input type="color" id="bg-color" value="#0f121d" style="padding: 2px; height: 38px; cursor: pointer;">
+                        </div>
+                        <div class="input-cell">
+                            <label for="bg-tolerance">Tolerance (1-100)</label>
+                            <input type="number" id="bg-tolerance" value="15" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Output Settings</h3>
+                <p class="help-text">Final padded image resolution (GPU preferred).</p>
+                
+                <div class="input-cell full-width">
+                    <label for="output-size">Power of Two Size</label>
+                    <select id="output-size">
+                        <option value="16">16 x 16</option>
+                        <option value="32">32 x 32</option>
+                        <option value="64" selected>64 x 64</option>
+                        <option value="128">128 x 128</option>
+                        <option value="256">256 x 256</option>
+                        <option value="512">512 x 512</option>
+                    </select>
+                </div>
+                
+                <div class="info-box" id="padding-info">
+                    Padding: calculcating...
+                </div>
+            </div>
+
+            <div class="control-section">
+                <h3>Export</h3>
+                <div class="input-cell full-width">
+                    <label for="file-prefix">File Naming Scheme</label>
+                    <input type="text" id="file-prefix" value="Sprite_" placeholder="e.g. Gem_">
+                    <p class="help-text">Files will be named prefix0.png, prefix1.png, etc.</p>
+                </div>
+                
+                <button id="slice-btn" class="primary-btn" disabled>
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Download .ZIP
+                </button>
+            </div>
+            
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <div class="toolbar">
+                <div class="stats" id="image-stats">No Image Loaded</div>
+                <div class="view-controls">
+                    <button id="zoom-out" class="icon-btn">-</button>
+                    <span id="zoom-level">100%</span>
+                    <button id="zoom-in" class="icon-btn">+</button>
+                </div>
+            </div>
+            
+            <div class="canvas-container" id="canvas-wrapper">
+                <div class="placeholder" id="placeholder">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="4em" width="4em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <p>Upload a sprite sheet to begin</p>
+                </div>
+                <canvas id="preview-canvas" style="display: none;"></canvas>
+            </div>
+        </main>
+        
+    </div>
+
+    <!-- Feedback Toast -->
+    <div id="toast" class="toast">Action Complete!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
